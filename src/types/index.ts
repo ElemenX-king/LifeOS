@@ -42,6 +42,7 @@ export interface Project {
   target?: number
   completionNote?: string
   isArchived?: boolean
+  depth?: number
 }
 
 // ========== 执行条目 ==========

@@ -20,13 +20,7 @@ function addDays(dateStr: string, days: number): string {
   return d.toISOString().slice(0, 10)
 }
 
-function dateDiffDays(a: string, b: string): number {
-  const da = new Date(a + 'T00:00:00')
-  const db = new Date(b + 'T00:00:00')
-  return Math.round((da.getTime() - db.getTime()) / 86400000)
-}
-
-export function GanttBar({ project, cellWidth, days, totalDays, barColor, rowHeight, onUpdate, onDragPreview }: GanttBarProps) {
+export function GanttBar({ project, cellWidth, days, totalDays, barColor, onUpdate, onDragPreview }: GanttBarProps) {
   const startIdx = days.indexOf(project.startDate)
   const endIdx = days.indexOf(project.endDate)
 

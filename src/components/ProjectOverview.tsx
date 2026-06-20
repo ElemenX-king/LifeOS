@@ -8,7 +8,6 @@ const todayStr = new Date().toISOString().slice(0, 10)
 const DAY_W = 40
 const GANTT_RANGE = 30
 
-function toDate(str: string) { return new Date(str + 'T00:00:00') }
 function dateStr(d: Date) { return d.toISOString().slice(0, 10) }
 
 function getGanttDays(center: Date) {

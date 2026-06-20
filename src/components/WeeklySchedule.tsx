@@ -175,7 +175,7 @@ export function WeeklySchedule({ onToggle }: { onToggle: (id: number) => void })
         })}
 
         {/* 任务列 */}
-        {weekDates.map((dateStr, colIdx) => {
+        {weekDates.map((dateStr) => {
           const dayTodos = todosByDate[dateStr] || []
           const isToday = dateStr === todayStr
           return (
