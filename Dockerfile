@@ -1,16 +1,9 @@
-FROM node:22-slim AS builder
+FROM node:22
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
 COPY . .
-RUN npm run build
-
-FROM node:22-slim
-WORKDIR /app
-COPY package*.json ./
+RUN npm ci && npm run build
+RUN rm -rf node_modules src public index.html vite.config.ts tsconfig*.json eslint.config.js
 RUN npm ci --omit=dev
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/server ./server
 RUN mkdir -p /app/data
 EXPOSE 3000
 CMD ["node", "--import", "tsx", "server/index.ts"]
