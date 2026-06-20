@@ -50,7 +50,7 @@ export function DailyHabits({ habits, todayRecords, loading, onToggle, onUpdate,
                 <button
                   key={habit.id}
                   onClick={() => onToggle(habit.id!)}
-                  className="flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-gray-50"
+                  className="group flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-gray-50"
                 >
                   {/* 复选框 */}
                   <span className="flex-shrink-0">
