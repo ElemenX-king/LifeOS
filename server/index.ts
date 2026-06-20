@@ -1,30 +1,27 @@
 import express from 'express'
 import cors from 'cors'
 import path from 'path'
-import db from './database'
+import { getDb, all, first, run } from './database'
 
 const app = express()
-app.use(cors())
-app.use(express.json())
-app.use(express.static(path.join(process.cwd(), 'dist')))
+app.use(cors()); app.use(express.json()); app.use(express.static(path.join(process.cwd(), 'dist')))
 
 // TODOS
-app.get('/api/todos', (_req, res) => res.json(db.prepare('SELECT * FROM todos ORDER BY date, createdAt').all()))
-app.get('/api/todos/important', (_req, res) => res.json(db.prepare('SELECT * FROM todos WHERE isImportant=1 ORDER BY date').all()))
-app.post('/api/todos', (req, res) => {
-  const { title, priority, date, dueDate, isImportant } = req.body
-  const now = Date.now()
-  const r = db.prepare('INSERT INTO todos (title,completed,priority,category,date,dueDate,isImportant,createdAt,updatedAt) VALUES (?,0,?,?,?,?,?,?,?)').run(title, priority||'medium', 'other', date, dueDate||null, isImportant?1:0, now, now)
-  res.status(201).json(db.prepare('SELECT * FROM todos WHERE id=?').get(r.lastInsertRowid))
+app.get('/api/todos', async (_req, res) => { await getDb(); res.json(all('SELECT * FROM todos ORDER BY date, createdAt')) })
+app.get('/api/todos/important', async (_req, res) => { await getDb(); res.json(all('SELECT * FROM todos WHERE isImportant=1 ORDER BY date')) })
+app.post('/api/todos', async (req, res) => {
+  await getDb(); const { title, priority, date, dueDate, isImportant } = req.body; const now = Date.now()
+  run('INSERT INTO todos (title,completed,priority,category,date,dueDate,isImportant,createdAt,updatedAt) VALUES (?,0,?,?,?,?,?,?,?)', [title, priority||'medium', 'other', date, dueDate||null, isImportant?1:0, now, now])
+  res.status(201).json(first('SELECT * FROM todos ORDER BY id DESC LIMIT 1'))
 })
-app.patch('/api/todos/:id/toggle', (req, res) => {
-  const t = db.prepare('SELECT * FROM todos WHERE id=?').get(req.params.id) as any
+app.patch('/api/todos/:id/toggle', async (req, res) => {
+  await getDb(); const t = first('SELECT * FROM todos WHERE id=?', [req.params.id]) as any
   if (!t) return res.status(404).json({ error: 'Not found' })
-  db.prepare('UPDATE todos SET completed=?,updatedAt=? WHERE id=?').run(t.completed?0:1, Date.now(), req.params.id)
-  res.json(db.prepare('SELECT * FROM todos WHERE id=?').get(req.params.id))
+  run('UPDATE todos SET completed=?,updatedAt=? WHERE id=?', [t.completed?0:1, Date.now(), req.params.id])
+  res.json(first('SELECT * FROM todos WHERE id=?', [req.params.id]))
 })
-app.patch('/api/todos/:id', (req, res) => {
-  const { title, priority, date, dueDate, isImportant, completed } = req.body
+app.patch('/api/todos/:id', async (req, res) => {
+  await getDb(); const { title, priority, date, dueDate, isImportant, completed } = req.body
   const f: string[] = []; const v: any[] = []
   if (title !== undefined) { f.push('title=?'); v.push(title) }
   if (priority !== undefined) { f.push('priority=?'); v.push(priority) }
@@ -32,96 +29,88 @@ app.patch('/api/todos/:id', (req, res) => {
   if (dueDate !== undefined) { f.push('dueDate=?'); v.push(dueDate) }
   if (isImportant !== undefined) { f.push('isImportant=?'); v.push(isImportant?1:0) }
   if (completed !== undefined) { f.push('completed=?'); v.push(completed?1:0) }
-  if (!f.length) return res.json(db.prepare('SELECT * FROM todos WHERE id=?').get(req.params.id))
+  if (!f.length) return res.json(first('SELECT * FROM todos WHERE id=?', [req.params.id]))
   f.push('updatedAt=?'); v.push(Date.now()); v.push(req.params.id)
-  db.prepare(`UPDATE todos SET ${f.join(',')} WHERE id=?`).run(...v)
-  res.json(db.prepare('SELECT * FROM todos WHERE id=?').get(req.params.id))
+  run(`UPDATE todos SET ${f.join(',')} WHERE id=?`, v)
+  res.json(first('SELECT * FROM todos WHERE id=?', [req.params.id]))
 })
-app.delete('/api/todos/:id', (req, res) => { db.prepare('DELETE FROM todos WHERE id=?').run(req.params.id); res.json({ ok: true }) })
+app.delete('/api/todos/:id', async (req, res) => { await getDb(); run('DELETE FROM todos WHERE id=?', [req.params.id]); res.json({ ok: true }) })
 
 // PROJECTS
-app.get('/api/projects', (_req, res) => res.json(db.prepare('SELECT * FROM projects ORDER BY startDate').all()))
-app.post('/api/projects', (req, res) => {
-  const { name, parentId, startDate, endDate, type, target } = req.body
-  const r = db.prepare('INSERT INTO projects (name,parentId,startDate,endDate,type,target,isArchived) VALUES (?,?,?,?,?,?,0)').run(name, parentId||null, startDate, endDate, type||'personal', target||null)
-  res.status(201).json(db.prepare('SELECT * FROM projects WHERE id=?').get(r.lastInsertRowid))
+app.get('/api/projects', async (_req, res) => { await getDb(); res.json(all('SELECT * FROM projects ORDER BY startDate')) })
+app.post('/api/projects', async (req, res) => {
+  await getDb(); const { name, parentId, startDate, endDate, type, target } = req.body
+  run('INSERT INTO projects (name,parentId,startDate,endDate,type,target,isArchived) VALUES (?,?,?,?,?,?,0)', [name, parentId||null, startDate, endDate, type||'personal', target||null])
+  res.status(201).json(first('SELECT * FROM projects ORDER BY id DESC LIMIT 1'))
 })
-app.patch('/api/projects/:id', (req, res) => {
-  const { name, target, startDate, endDate } = req.body
+app.patch('/api/projects/:id', async (req, res) => {
+  await getDb(); const { name, target, startDate, endDate } = req.body
   const f: string[] = []; const v: any[] = []
   if (name !== undefined) { f.push('name=?'); v.push(name) }
   if (target !== undefined) { f.push('target=?'); v.push(target) }
   if (startDate !== undefined) { f.push('startDate=?'); v.push(startDate) }
   if (endDate !== undefined) { f.push('endDate=?'); v.push(endDate) }
-  if (!f.length) return res.json(db.prepare('SELECT * FROM projects WHERE id=?').get(req.params.id))
-  v.push(req.params.id)
-  db.prepare(`UPDATE projects SET ${f.join(',')} WHERE id=?`).run(...v)
-  res.json(db.prepare('SELECT * FROM projects WHERE id=?').get(req.params.id))
+  if (!f.length) return res.json(first('SELECT * FROM projects WHERE id=?', [req.params.id]))
+  v.push(req.params.id); run(`UPDATE projects SET ${f.join(',')} WHERE id=?`, v)
+  res.json(first('SELECT * FROM projects WHERE id=?', [req.params.id]))
 })
-app.delete('/api/projects/:id', (req, res) => { db.prepare('DELETE FROM projects WHERE id=?').run(req.params.id); res.json({ ok: true }) })
-app.patch('/api/projects/:id/archive', (req, res) => {
-  const p = db.prepare('SELECT * FROM projects WHERE id=?').get(req.params.id) as any
+app.delete('/api/projects/:id', async (req, res) => { await getDb(); run('DELETE FROM projects WHERE id=?', [req.params.id]); res.json({ ok: true }) })
+app.patch('/api/projects/:id/archive', async (req, res) => {
+  await getDb(); const p = first('SELECT * FROM projects WHERE id=?', [req.params.id]) as any
   if (!p) return res.status(404).json({ error: 'Not found' })
-  db.prepare('UPDATE projects SET isArchived=? WHERE id=?').run(p.isArchived?0:1, req.params.id)
-  res.json(db.prepare('SELECT * FROM projects WHERE id=?').get(req.params.id))
+  run('UPDATE projects SET isArchived=? WHERE id=?', [p.isArchived?0:1, req.params.id])
+  res.json(first('SELECT * FROM projects WHERE id=?', [req.params.id]))
 })
 
 // EXECUTIONS
-app.get('/api/executions', (_req, res) => res.json(db.prepare('SELECT * FROM executions ORDER BY date DESC').all()))
-app.post('/api/executions', (req, res) => {
-  const r = db.prepare('INSERT INTO executions (subProjectId,parentId,name,target,date,notes) VALUES (?,?,?,?,?,?)').run(req.body.subProjectId, req.body.parentId, req.body.name, req.body.target, req.body.date, req.body.notes||'')
-  res.status(201).json(db.prepare('SELECT * FROM executions WHERE id=?').get(r.lastInsertRowid))
+app.get('/api/executions', async (_req, res) => { await getDb(); res.json(all('SELECT * FROM executions ORDER BY date DESC')) })
+app.post('/api/executions', async (req, res) => {
+  await getDb(); run('INSERT INTO executions (subProjectId,parentId,name,target,date,notes) VALUES (?,?,?,?,?,?)', [req.body.subProjectId, req.body.parentId, req.body.name, req.body.target, req.body.date, req.body.notes||''])
+  res.status(201).json(first('SELECT * FROM executions ORDER BY id DESC LIMIT 1'))
 })
-app.delete('/api/executions/:id', (req, res) => { db.prepare('DELETE FROM executions WHERE id=?').run(req.params.id); res.json({ ok: true }) })
+app.delete('/api/executions/:id', async (req, res) => { await getDb(); run('DELETE FROM executions WHERE id=?', [req.params.id]); res.json({ ok: true }) })
 
 // HABITS
-app.get('/api/habits', (_req, res) => res.json(db.prepare('SELECT * FROM habits').all()))
-app.post('/api/habits', (req, res) => {
-  const r = db.prepare('INSERT INTO habits (name,type) VALUES (?,?)').run(req.body.name, req.body.type||'positive')
-  res.status(201).json(db.prepare('SELECT * FROM habits WHERE id=?').get(r.lastInsertRowid))
+app.get('/api/habits', async (_req, res) => { await getDb(); res.json(all('SELECT * FROM habits')) })
+app.post('/api/habits', async (req, res) => {
+  await getDb(); run('INSERT INTO habits (name,type) VALUES (?,?)', [req.body.name, req.body.type||'positive'])
+  res.status(201).json(first('SELECT * FROM habits ORDER BY id DESC LIMIT 1'))
 })
-app.delete('/api/habits/:id', (req, res) => { db.prepare('DELETE FROM habits WHERE id=?').run(req.params.id); res.json({ ok: true }) })
+app.delete('/api/habits/:id', async (req, res) => { await getDb(); run('DELETE FROM habits WHERE id=?', [req.params.id]); res.json({ ok: true }) })
 
 // HABIT RECORDS
-app.get('/api/habit-records', (req, res) => {
-  const { year, month } = req.query
+app.get('/api/habit-records', async (req, res) => {
+  await getDb(); const { year, month } = req.query
   if (year && month) {
     const prefix = `${year}-${String(Number(month)+1).padStart(2,'0')}`
-    return res.json(db.prepare('SELECT * FROM habit_records WHERE date LIKE ?').all(`${prefix}%`))
+    return res.json(all('SELECT * FROM habit_records WHERE date LIKE ?', [`${prefix}%`]))
   }
-  res.json(db.prepare('SELECT * FROM habit_records').all())
+  res.json(all('SELECT * FROM habit_records'))
 })
-app.get('/api/habit-records/today', (_req, res) => {
-  const today = new Date().toISOString().slice(0,10)
-  res.json(db.prepare('SELECT * FROM habit_records WHERE date=?').all(today))
+app.get('/api/habit-records/today', async (_req, res) => {
+  await getDb(); const today = new Date().toISOString().slice(0,10)
+  res.json(all('SELECT * FROM habit_records WHERE date=?', [today]))
 })
-app.patch('/api/habit-records/:habitId/toggle', (req, res) => {
-  const today = new Date().toISOString().slice(0,10)
-  const rec = db.prepare('SELECT * FROM habit_records WHERE habitId=? AND date=?').get(req.params.habitId, today) as any
-  if (rec) { db.prepare('DELETE FROM habit_records WHERE id=?').run(rec.id); res.json({ toggled: false }) }
-  else {
-    const r = db.prepare('INSERT INTO habit_records (habitId,date,status) VALUES (?,?,?)').run(req.params.habitId, today, 'completed')
-    res.json({ toggled: true, record: db.prepare('SELECT * FROM habit_records WHERE id=?').get(r.lastInsertRowid) })
-  }
+app.patch('/api/habit-records/:habitId/toggle', async (req, res) => {
+  await getDb(); const today = new Date().toISOString().slice(0,10)
+  const rec = first('SELECT * FROM habit_records WHERE habitId=? AND date=?', [req.params.habitId, today]) as any
+  if (rec) { run('DELETE FROM habit_records WHERE id=?', [rec.id]); res.json({ toggled: false }) }
+  else { run('INSERT INTO habit_records (habitId,date,status) VALUES (?,?,?)', [req.params.habitId, today, 'completed']); res.json({ toggled: true, record: first('SELECT * FROM habit_records ORDER BY id DESC LIMIT 1') }) }
 })
 
 // JOURNAL
-app.get('/api/journal/:date', (req, res) => {
-  const note = db.prepare('SELECT * FROM daily_notes WHERE date=?').get(req.params.date) as any
-  res.json({ content: note?.content || '' })
+app.get('/api/journal/:date', async (req, res) => {
+  await getDb(); const note = first('SELECT * FROM daily_notes WHERE date=?', [req.params.date])
+  res.json({ content: (note as any)?.content || '' })
 })
-app.put('/api/journal/:date', (req, res) => {
-  db.prepare('INSERT OR REPLACE INTO daily_notes (date, content) VALUES (?, ?)').run(req.params.date, req.body.content || '')
+app.put('/api/journal/:date', async (req, res) => {
+  await getDb(); run('INSERT OR REPLACE INTO daily_notes (date, content) VALUES (?, ?)', [req.params.date, req.body.content||''])
   res.json({ ok: true })
 })
 
 // SPA fallback
 app.get('/{*splat}', (_req, res) => res.sendFile(path.join(process.cwd(), 'dist', 'index.html')))
 
-// 清理旧种子数据（只运行一次）
-const count = db.prepare('SELECT COUNT(*) as c FROM todos').get() as any
-if (count.c > 0 && db.prepare("SELECT COUNT(*) as c FROM todos WHERE title='完成 Q2 产品报告'").get() as any) {
-  db.exec("DELETE FROM todos; DELETE FROM projects; DELETE FROM executions; VACUUM;")
-}
-
-app.listen(process.env.PORT || 3000, () => console.log('🚀 LifeOS on :' + (process.env.PORT || 3000)))
+getDb().then(() => {
+  app.listen(process.env.PORT || 3000, () => console.log('🚀 LifeOS on :' + (process.env.PORT || 3000)))
+})
