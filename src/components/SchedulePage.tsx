@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, type FormEvent } from 'react'
 import { Plus, Trash2, Circle, ChevronRight, ChevronLeft, Pencil, X } from 'lucide-react'
-import { db } from '../db/db'
+import { api } from '../api'
 import type { Priority, Todo } from '../types'
 
 // ========== 格式化 ==========
@@ -83,7 +83,7 @@ export function SchedulePage() {
 
   const loadAll = useCallback(async () => {
     setLoading(true)
-    const all = await db.todos.toArray()
+    const all = await api.getTodos()
     all.sort((a, b) => a.date.localeCompare(b.date) || a.createdAt - b.createdAt)
     setAllTodos(all)
     setLoading(false)
@@ -137,7 +137,7 @@ export function SchedulePage() {
 
   const saveEdit = async () => {
     if (!editItem || !editTitle.trim()) return
-    await db.todos.update(editItem.id, {
+    await api.updateTodo(editItem.id, {
       title: editTitle.trim(),
       priority: editItem.type === 'important' ? 'medium' : editPriority,
       date: editDate,
@@ -158,18 +158,17 @@ export function SchedulePage() {
   const handleAdd = async (e: FormEvent) => {
     e.preventDefault()
     if (!addTitle.trim()) return
-    const now = Date.now()
     if (addType === 'important') {
-      await db.todos.add({ title: addTitle.trim(), completed: false, priority: 'medium', category: 'other', date: addDate, dueDate: addDate, isImportant: true, createdAt: now, updatedAt: now })
+      await api.addTodo({ title: addTitle.trim(), priority: 'medium', date: addDate, dueDate: addDate, isImportant: true })
     } else {
-      await db.todos.add({ title: addTitle.trim(), completed: false, priority: addPriority, category: 'other', date: addDate, createdAt: now, updatedAt: now })
+      await api.addTodo({ title: addTitle.trim(), priority: addPriority, date: addDate })
     }
     setShowAddForm(false)
     loadAll()
   }
 
   const handleDelete = async (id: number) => {
-    await db.todos.delete(id)
+    await api.deleteTodo(id)
     loadAll()
     // 如果当前页变空了，回退一页
     if (pagedItems.length === 1 && page > 1) setPage((p) => p - 1)

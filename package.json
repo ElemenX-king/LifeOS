@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:server": "tsx server/index.ts",
+    "dev:all": "concurrently \"npm run dev\" \"npm run dev:server\"",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node --import tsx server/index.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.1",

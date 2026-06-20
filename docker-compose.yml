@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  lifeos:
+    build: .
+    container_name: lifeos
+    ports:
+      - "8080:3000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

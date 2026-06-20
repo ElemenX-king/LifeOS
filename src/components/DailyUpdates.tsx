@@ -92,12 +92,28 @@ export function DailyUpdates() {
           <p className="text-xs text-gray-400">今日暂无活跃项目</p>
         ) : (
           <div className="space-y-1">
-            {activeProjects.map((p) => (
-              <div key={p.id} className="flex items-center gap-2">
-                <Target className="h-3 w-3 flex-shrink-0 text-gray-500" />
-                <span className="text-sm text-gray-700">{p.name}</span>
-              </div>
-            ))}
+            {activeProjects
+              .sort((a, b) => {
+                const aParent = a.parentId ? 1 : 0
+                const bParent = b.parentId ? 1 : 0
+                if (aParent !== bParent) return aParent - bParent
+                return a.startDate.localeCompare(b.startDate)
+              })
+              .map((p) => (
+                <div
+                  key={p.id}
+                  className={`flex items-center gap-2 ${p.parentId ? 'ml-5' : ''}`}
+                >
+                  {p.parentId ? (
+                    <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-purple-300" />
+                  ) : (
+                    <Target className="h-3 w-3 flex-shrink-0 text-purple-500" />
+                  )}
+                  <span className={`text-sm ${p.parentId ? 'text-gray-500' : 'font-medium text-gray-700'}`}>
+                    {p.name}
+                  </span>
+                </div>
+              ))}
           </div>
         )}
       </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react'
-import { db } from '../db/db'
+import { api } from '../api'
 import type { Todo } from '../types'
 
 // ========== 获取某天的周日（week start） ==========
@@ -55,20 +55,15 @@ export function WeeklySchedule({ onToggle }: { onToggle: (id: number) => void })
 
   const loadWeek = async () => {
     setLoading(true)
-    const start = weekDates[0]
-    const end = weekDates[6]
-    const all = await db.todos
-      .where('date')
-      .between(start, end, true, true)
-      .filter((t) => !t.isImportant)
-      .toArray()
-
-    const grouped: Record<string, Todo[]> = {}
-    weekDates.forEach((d) => { grouped[d] = [] })
-    all.forEach((t) => {
-      if (grouped[t.date]) grouped[t.date].push(t)
-    })
-    setTodosByDate(grouped)
+    try {
+      const all = await api.getTodos()
+      const start = weekDates[0]; const end = weekDates[6]
+      const filtered = all.filter((t: Todo) => !t.isImportant && t.date >= start && t.date <= end)
+      const grouped: Record<string, Todo[]> = {}
+      weekDates.forEach((d) => { grouped[d] = [] })
+      filtered.forEach((t: Todo) => { if (grouped[t.date]) grouped[t.date].push(t) })
+      setTodosByDate(grouped)
+    } catch (e) { console.error(e) }
     setLoading(false)
   }
 

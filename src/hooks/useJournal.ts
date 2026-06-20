@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { db } from '../db/db'
+import { api } from '../api'
 
 function getTodayStr() {
   return new Date().toISOString().slice(0, 10)
@@ -11,15 +11,17 @@ export function useJournal() {
   const [loading, setLoading] = useState(true)
 
   const loadNote = useCallback(async () => {
-    const note = await db.table('daily_notes').get(todayStr)
-    setContent(note?.content || '')
+    try {
+      const result = await api.getJournal(todayStr)
+      setContent(result.content || '')
+    } catch (e) { console.error(e) }
     setLoading(false)
   }, [todayStr])
 
   useEffect(() => { loadNote() }, [loadNote])
 
   const saveNote = useCallback(async (text: string) => {
-    await db.table('daily_notes').put({ date: todayStr, content: text })
+    await api.saveJournal(todayStr, text)
     setContent(text)
   }, [todayStr])
 
