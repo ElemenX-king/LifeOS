@@ -32,19 +32,15 @@ export function useHabits() {
     setTodayRecords((prev) => result.toggled ? [...prev, result.record] : prev.filter((r: any) => r.habitId !== Number(habitId)))
   }, [])
 
+  const updateHabit = useCallback(async (id: number, data: { name: string; type: HabitType }) => {
+    const updated = await api.updateHabit(id, data)
+    setHabits((prev) => prev.map((h) => h.id === id ? updated : h))
+  }, [])
+
   const deleteHabit = useCallback(async (id: number) => {
     await api.deleteHabit(id)
     setHabits((prev) => prev.filter((h) => h.id !== id))
   }, [])
 
-  return {
-    habits,
-    todayRecords,
-    loading,
-    addHabit,
-    toggleHabitStatus,
-    deleteHabit,
-    getMonthRecords,
-    refresh: loadAll,
-  }
+  return { habits, todayRecords, loading, addHabit, updateHabit, toggleHabitStatus, deleteHabit, getMonthRecords, refresh: loadAll }
 }

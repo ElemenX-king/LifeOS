@@ -76,6 +76,10 @@ app.post('/api/habits', async (req, res) => {
   await getDb(); run('INSERT INTO habits (name,type) VALUES (?,?)', [req.body.name, req.body.type||'positive'])
   res.status(201).json(first('SELECT * FROM habits ORDER BY id DESC LIMIT 1'))
 })
+app.patch('/api/habits/:id', async (req, res) => {
+  await getDb(); run('UPDATE habits SET name=?, type=? WHERE id=?', [req.body.name, req.body.type, req.params.id])
+  res.json(first('SELECT * FROM habits WHERE id=?', [req.params.id]))
+})
 app.delete('/api/habits/:id', async (req, res) => { await getDb(); run('DELETE FROM habits WHERE id=?', [req.params.id]); res.json({ ok: true }) })
 
 // HABIT RECORDS

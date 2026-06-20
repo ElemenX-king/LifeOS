@@ -27,6 +27,7 @@ export const api = {
 
   getHabits: () => request<any[]>('/api/habits'),
   addHabit: (data: any) => request<any>('/api/habits', { method: 'POST', body: JSON.stringify(data) }),
+  updateHabit: (id: number, data: any) => request<any>(`/api/habits/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteHabit: (id: number) => request<any>(`/api/habits/${id}`, { method: 'DELETE' }),
 
   getMonthRecords: (year: number, month: number) => request<any[]>(`/api/habit-records?year=${year}&month=${month}`),

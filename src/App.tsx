@@ -18,7 +18,7 @@ import type { Priority, HabitType, HabitRecord } from './types'
 
 function App() {
   const { todos, loading, addTodo, toggleTodo, updateTodo, deleteTodo, importantTodos, importantLoading, addImportantTodo, deleteImportantTodo } = useTodos()
-  const { habits, todayRecords, loading: habitsLoading, addHabit, toggleHabitStatus, getMonthRecords } = useHabits()
+  const { habits, todayRecords, loading: habitsLoading, addHabit, updateHabit, toggleHabitStatus, deleteHabit, getMonthRecords } = useHabits()
   const [monthRecords, setMonthRecords] = useState<HabitRecord[]>([])
   const [activeModule, setActiveModule] = useState<string | null>(null)
 
@@ -50,7 +50,7 @@ function App() {
               <aside className="dashboard-left">
                 <MiniCalendar importantTodos={importantTodos} />
                 <DailyUpdates />
-                <DailyHabits habits={habits} todayRecords={todayRecords} loading={habitsLoading} onToggle={toggleHabitStatus} />
+                <DailyHabits habits={habits} todayRecords={todayRecords} loading={habitsLoading} onToggle={toggleHabitStatus} onUpdate={updateHabit} onDelete={deleteHabit} />
               </aside>
 
               <section className="dashboard-right">
