@@ -102,13 +102,13 @@ app.patch('/api/habit-records/:habitId/toggle', async (req, res) => {
   else { run('INSERT INTO habit_records (habitId,date,status) VALUES (?,?,?)', [req.params.habitId, today, 'completed']); res.json({ toggled: true, record: first('SELECT * FROM habit_records ORDER BY id DESC LIMIT 1') }) }
 })
 
-// JOURNAL
-app.get('/api/journal/:date', async (req, res) => {
-  await getDb(); const note = first('SELECT * FROM daily_notes WHERE date=?', [req.params.date])
+// JOURNAL (persistent note)
+app.get('/api/journal', async (_req, res) => {
+  await getDb(); const note = first('SELECT * FROM daily_notes WHERE date=?', ['persistent'])
   res.json({ content: (note as any)?.content || '' })
 })
-app.put('/api/journal/:date', async (req, res) => {
-  await getDb(); run('INSERT OR REPLACE INTO daily_notes (date, content) VALUES (?, ?)', [req.params.date, req.body.content||''])
+app.put('/api/journal', async (req, res) => {
+  await getDb(); run('INSERT OR REPLACE INTO daily_notes (date, content) VALUES (?, ?)', ['persistent', req.body.content||''])
   res.json({ ok: true })
 })
 

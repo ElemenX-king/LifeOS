@@ -130,7 +130,6 @@ export function MiniCalendar({ importantTodos }: MiniCalendarProps) {
               const dayNum = parseInt(todo.date.slice(8, 10), 10)
               return (
                 <div key={todo.id} className="flex items-center gap-2 rounded px-2 py-1 text-sm">
-                  <span className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border-2 border-gray-200" />
                   <span className="rounded bg-[#F2BF80]/20 px-1 text-xs font-bold text-[#D97D48]">{dayNum}</span>
                   <ArrowRight className="h-3 w-3 text-gray-300" />
                   <span className="text-[#593325]/60">{todo.title}</span>

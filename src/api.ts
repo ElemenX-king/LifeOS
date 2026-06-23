@@ -34,6 +34,6 @@ export const api = {
   getTodayRecords: () => request<any[]>('/api/habit-records/today'),
   toggleHabit: (habitId: number) => request<any>(`/api/habit-records/${habitId}/toggle`, { method: 'PATCH' }),
 
-  getJournal: (date: string) => request<{ content: string }>(`/api/journal/${date}`),
-  saveJournal: (date: string, content: string) => request<any>(`/api/journal/${date}`, { method: 'PUT', body: JSON.stringify({ content }) }),
+  getJournal: () => request<{ content: string }>('/api/journal'),
+  saveJournal: (content: string) => request<any>('/api/journal', { method: 'PUT', body: JSON.stringify({ content }) }),
 }

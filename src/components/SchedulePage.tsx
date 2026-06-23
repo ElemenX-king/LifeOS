@@ -84,15 +84,14 @@ export function SchedulePage() {
   const loadAll = useCallback(async () => {
     setLoading(true)
     const all = await api.getTodos()
-    all.sort((a, b) => a.date.localeCompare(b.date) || a.createdAt - b.createdAt)
+    all.sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt)
     setAllTodos(all)
     setLoading(false)
   }, [])
 
   useEffect(() => { loadAll() }, [loadAll])
 
-  // 构建日程列表（全部），按优先级 > 时间排序
-  const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2, '-': 3 }
+  // 构建日程列表（全部），按时间降序
   const scheduleItems: ScheduleItem[] = allTodos
     .map((t) => ({
       id: t.id!,
@@ -102,12 +101,7 @@ export function SchedulePage() {
       date: t.date,
       isCompleted: t.completed,
     }))
-    .sort((a, b) => {
-      const pa = priorityOrder[a.priority] ?? 99
-      const pb = priorityOrder[b.priority] ?? 99
-      if (pa !== pb) return pa - pb
-      return a.date.localeCompare(b.date)
-    })
+    .sort((a, b) => b.date.localeCompare(a.date))
 
   const totalItems = scheduleItems.length
   const pagedItems = scheduleItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
