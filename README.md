@@ -68,6 +68,7 @@ PORT=8080 npm start
 - 内置 Express 服务端 + **sql.js**（SQLite 编译为 WASM）
 - 数据保存在 `./data/` 目录，与 Docker 模式完全兼容
 - 要求：Node.js ≥ 18
+- 每次打开页面自动检查 GitHub 最新版本，有更新会提示 🆕
 
 ---
 

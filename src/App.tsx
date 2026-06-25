@@ -3,6 +3,7 @@ import './index.css'
 import { useTodos } from './hooks/useTodos'
 import { useHabits } from './hooks/useHabits'
 import { Banner } from './components/Banner'
+import { UpdateBanner } from './components/UpdateBanner'
 import { ModuleCards } from './components/ModuleCards'
 import { MiniCalendar } from './components/MiniCalendar'
 import { DailyUpdates } from './components/DailyUpdates'
@@ -40,6 +41,7 @@ function App() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#f8f9fb]">
       <main className="mx-auto max-w-[1440px] px-6 pb-12">
+        <UpdateBanner />
         <Banner />
         <div className="w-full">
           <ModuleCards activeModule={activeModule} onModuleClick={handleModuleClick} />
