@@ -49,6 +49,28 @@ npm run preview
 
 ---
 
+## 💻 本地部署（免 Docker）
+
+```bash
+# 安装依赖
+npm install
+
+# 构建前端
+npm run build
+
+# 启动服务（默认 :3000）
+npm start
+
+# 自定义端口
+PORT=8080 npm start
+```
+
+- 内置 Express 服务端 + **sql.js**（SQLite 编译为 WASM）
+- 数据保存在 `./data/` 目录，与 Docker 模式完全兼容
+- 要求：Node.js ≥ 18
+
+---
+
 ## 🐳 Docker 部署
 
 ```bash
