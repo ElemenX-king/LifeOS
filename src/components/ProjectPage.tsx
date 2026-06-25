@@ -96,7 +96,7 @@ const ALL_LABELS = ['Aa 计划事项', '类型', '目标/指标', '进度', '开
 
 // ========== 项目管理页面 ==========
 export function ProjectPage() {
-  const { projects, executions, addExecution, deleteProject, deleteExecution, archiveProject, updateProject } = useProjects()
+  const { projects, executions, addProject, addExecution, deleteProject, deleteExecution, archiveProject, updateProject } = useProjects()
   const [currentView, setCurrentView] = useState<'main' | 'project_page' | 'all'>('main')
   const [collapsed, setCollapsed] = useState<Set<number>>(new Set())
   const [expandedExec, setExpandedExec] = useState<Set<number>>(new Set())
@@ -154,6 +154,16 @@ export function ProjectPage() {
   const [editStart, setEditStart] = useState('')
   const [editEnd, setEditEnd] = useState('')
 
+  // Add project form state
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [newType, setNewType] = useState<'school' | 'company' | 'personal'>('personal')
+  const [newStart, setNewStart] = useState(todayStr)
+  const [newEnd, setNewEnd] = useState('')
+  const [newTarget, setNewTarget] = useState('')
+  const [newParentId, setNewParentId] = useState<number | undefined>(undefined)
+  const nameInputRef = useRef<HTMLInputElement>(null)
+
   const openEditProject = (p: Project) => {
     setEditProject(p)
     setEditName(p.name)
@@ -180,6 +190,45 @@ export function ProjectPage() {
 
   const toggleExecExpand = (id: number) => {
     setExpandedExec((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  }
+
+  // 新建项目表单
+  const parentCandidates = projects.filter((p) => !p.parentId)
+  const selectedParent = newParentId ? projects.find((p) => p.id === newParentId) : undefined
+
+  const openAddForm = () => {
+    setShowAddForm(true)
+    setNewName('')
+    setNewType('personal')
+    setNewStart(todayStr)
+    setNewEnd('')
+    setNewTarget('')
+    setNewParentId(undefined)
+    setTimeout(() => nameInputRef.current?.focus(), 50)
+  }
+
+  const handleAddProject = (e: FormEvent) => {
+    e.preventDefault()
+    const trimmed = newName.trim()
+    if (!trimmed || !newEnd) return
+    addProject({
+      name: trimmed,
+      startDate: newStart,
+      endDate: newEnd,
+      type: newType,
+      parentId: newParentId,
+      target: newTarget ? parseInt(newTarget, 10) : undefined,
+    })
+    setShowAddForm(false)
+  }
+
+  const handleParentChange = (value: string) => {
+    const id = value ? parseInt(value) : undefined
+    setNewParentId(id)
+    if (id) {
+      const parent = projects.find((p) => p.id === id)
+      if (parent) setNewType(parent.type)
+    }
   }
 
   // 构建树形行 — 项目管理视图
@@ -293,10 +342,84 @@ export function ProjectPage() {
             </button>
           </div>
         </div>
-        <button className="inline-flex items-center gap-1.5 rounded-lg bg-[#D97D48] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#C06A3A]">
-          <Plus className="h-4 w-4" />新建项目
-        </button>
+        {!showAddForm && (
+          <button
+            onClick={openAddForm}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[#D97D48] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#C06A3A]"
+          >
+            <Plus className="h-4 w-4" />新建项目
+          </button>
+        )}
       </div>
+
+      {/* 新建项目表单 — 紧凑单行 */}
+      {showAddForm && (
+        <form onSubmit={handleAddProject} className="mb-4 flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+          <input
+            ref={nameInputRef}
+            type="text"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAddProject(e)}
+            placeholder="项目名称…"
+            className="min-w-[120px] flex-1 bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none"
+          />
+          <select
+            value={newType}
+            onChange={(e) => setNewType(e.target.value as 'school' | 'company' | 'personal')}
+            disabled={!!selectedParent}
+            className="cursor-pointer rounded-md border border-gray-200 bg-white px-2 py-1 text-xs text-gray-600 outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="school">学校项目</option>
+            <option value="company">公司项目</option>
+            <option value="personal">个人项目</option>
+          </select>
+          <select
+            value={newParentId ?? ''}
+            onChange={(e) => handleParentChange(e.target.value)}
+            className="cursor-pointer rounded-md border border-gray-200 bg-white px-2 py-1 text-xs text-gray-600 outline-none"
+          >
+            <option value="">无父项目</option>
+            {parentCandidates.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+          <input
+            type="date"
+            value={newStart}
+            onChange={(e) => setNewStart(e.target.value)}
+            className="w-28 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs text-gray-600 outline-none"
+          />
+          <input
+            type="date"
+            value={newEnd}
+            min={newStart}
+            onChange={(e) => setNewEnd(e.target.value)}
+            className="w-28 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs text-gray-600 outline-none"
+          />
+          <input
+            type="number"
+            value={newTarget}
+            onChange={(e) => setNewTarget(e.target.value)}
+            placeholder="目标"
+            className="w-16 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs text-gray-600 placeholder-gray-400 outline-none"
+          />
+          <button
+            type="submit"
+            disabled={!newName.trim() || !newEnd}
+            className="shrink-0 rounded-md bg-[#D97D48] px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-[#C06A3A] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            添加
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowAddForm(false)}
+            className="shrink-0 text-gray-400 hover:text-gray-600"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </form>
+      )}
 
       {/* ========== 动态内容区 ========== */}
 

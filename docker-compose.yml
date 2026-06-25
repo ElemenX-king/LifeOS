@@ -10,3 +10,11 @@ services:
     volumes:
       - ./data:/app/data
     restart: unless-stopped
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: lifeos-watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 3600 --cleanup --scope lifeos-stack lifeos
+    restart: unless-stopped

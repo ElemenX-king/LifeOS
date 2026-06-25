@@ -93,27 +93,27 @@ export function DailyUpdates() {
         ) : (
           <div className="space-y-1">
             {activeProjects
-              .sort((a, b) => {
-                const aParent = a.parentId ? 1 : 0
-                const bParent = b.parentId ? 1 : 0
-                if (aParent !== bParent) return aParent - bParent
-                return a.startDate.localeCompare(b.startDate)
-              })
-              .map((p) => (
-                <div
-                  key={p.id}
-                  className={`flex items-center gap-2 ${p.parentId ? 'ml-5' : ''}`}
-                >
-                  {p.parentId ? (
-                    <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-purple-300" />
-                  ) : (
-                    <Target className="h-3 w-3 flex-shrink-0 text-purple-500" />
-                  )}
-                  <span className={`text-sm ${p.parentId ? 'text-gray-500' : 'font-medium text-gray-700'}`}>
-                    {p.name}
-                  </span>
-                </div>
-              ))}
+              .filter((p) => !p.parentId)
+              .sort((a, b) => a.startDate.localeCompare(b.startDate))
+              .map((parent) => {
+                const children = activeProjects.filter((p) => p.parentId === parent.id)
+                return (
+                  <div key={parent.id}>
+                    {/* 父项目 */}
+                    <div className="flex items-center gap-2">
+                      <Target className="h-3 w-3 flex-shrink-0 text-purple-500" />
+                      <span className="text-sm font-medium text-gray-700">{parent.name}</span>
+                    </div>
+                    {/* 子项目 */}
+                    {children.map((child) => (
+                      <div key={child.id} className="ml-5 flex items-center gap-2">
+                        <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-purple-300" />
+                        <span className="text-sm text-gray-500">{child.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })}
           </div>
         )}
       </div>

@@ -211,7 +211,7 @@ export function WeeklySchedule({ onToggle }: { onToggle: (id: number) => void })
                           todo.completed ? 'bg-[#D97D48]' : 'border-2 border-gray-300'
                         }`}
                       >
-                        {todo.completed && <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />}
+                        {todo.completed ? <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} /> : null}
                       </span>
                       完成
                     </button>
