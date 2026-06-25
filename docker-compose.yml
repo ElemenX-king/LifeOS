@@ -16,5 +16,5 @@ services:
     container_name: lifeos-watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 3600 --cleanup --scope lifeos-stack lifeos
+    command: --interval 3600 --cleanup lifeos
     restart: unless-stopped
