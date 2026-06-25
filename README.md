@@ -49,32 +49,48 @@ npm run preview
 
 ---
 
-## 💻 本地部署（一键安装脚本）
+## 💻 本地部署（免 Docker）
 
-### Windows
+### 第一步：安装 Node.js
 
-**前置：** 装好 Node.js 和 Git（各去官网下载就行，一路下一步）
+1. 打开 https://nodejs.org
+2. 点左边的 **LTS** 下载（长期稳定版）
+3. 双击安装，一路「下一步」
+4. 验证：按 **Win + R**，输入 `powershell`，回车，输入 `node --version`，看到版本号就行
 
-1. 右键保存这个文件到桌面：  
-   👉 https://raw.githubusercontent.com/ElemenX-king/LifeOS/main/install.bat  
-   （右键 → **另存为**，文件名 `install.bat`）
+### 第二步：安装 Git
 
-2. **双击 `install.bat`** → 自动下载、安装、启动
+1. 打开 https://git-scm.com/download/win
+2. 下载安装，一路默认选项
+3. 验证：同一个 PowerShell 输入 `git --version`
 
-3. 浏览器访问 http://localhost:3000
+### 第三步：下载 LifeOS
 
-### Mac / Linux
+在 PowerShell 里粘贴：
 
-```bash
-# 前置：装好 Node.js 和 Git
-# macOS:  brew install node git
-
-curl -O https://raw.githubusercontent.com/ElemenX-king/LifeOS/main/install.sh
-chmod +x install.sh
-./install.sh
+```powershell
+cd $env:USERPROFILE\Desktop
+git clone https://github.com/ElemenX-king/LifeOS.git
+cd LifeOS
 ```
 
-每次打开页面自动检查更新，有新版点「一键更新」即可。
+### 第四步：安装并启动
+
+```powershell
+npm install
+npm run build
+npm run start:local
+```
+
+看到 `🚀 LifeOS on :3000` 就行。**别关这个窗口。**
+
+### 第五步：打开浏览器
+
+访问 http://localhost:3000
+
+---
+
+> 🆕 之后有更新，打开页面会自动提示，点「一键更新」即可。
 
 ---
 
