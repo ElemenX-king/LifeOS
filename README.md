@@ -71,18 +71,47 @@ PORT=8080 npm start
 
 ---
 
-## 🐳 Docker 部署
+## 🐳 Docker 部署（推荐，带自动更新）
 
-```bash
-# 拉取镜像并启动（含 Watchtower 自动更新）
+### 第一步：安装 Docker Desktop
+
+1. 打开浏览器，访问 https://www.docker.com/products/docker-desktop/
+2. 点击 **Download for Windows**，下载安装包
+3. 双击运行，一路「下一步」安装完成
+4. 安装后可能需要**重启电脑**
+5. 重启后 Docker Desktop 会自动启动，任务栏右下角出现鲸鱼图标 🐳
+   - 等待鲸鱼图标停止转动（大约 1 分钟），说明 Docker 已就绪
+
+### 第二步：下载部署文件
+
+1. 在桌面新建一个文件夹，右键 → **新建文件夹**，命名为 `LifeOS`
+2. 打开浏览器，访问这个链接下载配置文件：
+   
+   👉 https://raw.githubusercontent.com/ElemenX-king/LifeOS/main/docker-compose.yml
+   
+   右键 → **另存为**，保存到刚才建的 `LifeOS` 文件夹里
+
+### 第三步：启动
+
+1. 按键盘 **Win + R**，输入 `powershell`，回车
+2. 在蓝色窗口里输入以下命令（可以复制粘贴）：
+
+```powershell
+cd $env:USERPROFILE\Desktop\LifeOS
 docker compose up -d
-
-# 访问 http://localhost:8080
 ```
 
-- **Watchtower** 每小时自动检查 `ghcr.io/elemenx-king/lifeos:latest` 更新并重启容器
-- 数据保存在 `./data/` 目录，重启不丢失
-- 要求：Docker + Docker Compose
+3. 等待下载完成（第一次需要下载镜像，大约 3-5 分钟）
+
+### 第四步：打开
+
+浏览器访问 👉 http://localhost:8080
+
+---
+
+> 💡 **自动更新**：Watchtower 每小时自动检查最新版本并更新，你完全不用管。
+>
+> 📁 **数据位置**：所有数据存在 `LifeOS` 文件夹下的 `data` 目录，备份这个文件夹即可。
 
 ---
 
