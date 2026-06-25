@@ -49,6 +49,21 @@ npm run preview
 
 ---
 
+## 🐳 Docker 部署
+
+```bash
+# 拉取镜像并启动（含 Watchtower 自动更新）
+docker compose up -d
+
+# 访问 http://localhost:8080
+```
+
+- **Watchtower** 每小时自动检查 `ghcr.io/elemenx-king/lifeos:latest` 更新并重启容器
+- 数据保存在 `./data/` 目录，重启不丢失
+- 要求：Docker + Docker Compose
+
+---
+
 ## 🎨 色板
 
 | 用途 | 颜色 | 色值 |
@@ -97,7 +112,9 @@ src/
 
 ## 🗄 数据存储
 
-基于 **Dexie.js** (IndexedDB 封装)，所有数据存储在浏览器本地，无需后端。
+浏览器直连模式使用 **Dexie.js** (IndexedDB 封装)，所有数据存储在浏览器本地。
+
+Docker 部署模式使用 **sql.js**（SQLite 编译为 WebAssembly），数据持久化到 `./data/` 目录。
 
 - 📋 `todos` — 任务表（含优先级、日期、重要标记）
 - 📦 `projects` — 项目表（支持树形父子结构、归档）
