@@ -66,13 +66,15 @@ npm run preview
 
 ### 第三步：下载 LifeOS
 
-在 PowerShell 里粘贴：
+按 **Win + R**，输入 `powershell`，回车。在蓝色窗口里粘贴：
 
 ```powershell
-cd $env:USERPROFILE\Desktop
+cd $env:USERPROFILE\Documents
 git clone https://github.com/ElemenX-king/LifeOS.git
 cd LifeOS
 ```
+
+桌面上不会有任何东西，代码安静地放在「文档」里。
 
 ### 第四步：安装并启动
 
@@ -107,7 +109,7 @@ npm run start:local
 
 ### 第二步：下载部署文件
 
-1. 在桌面新建一个文件夹，右键 → **新建文件夹**，命名为 `LifeOS`
+1. 打开文件资源管理器，进入「文档」文件夹（`C:\Users\你的用户名\Documents`），新建一个文件夹叫 `LifeOS`
 2. 打开浏览器，访问这个链接下载配置文件：
    
    👉 https://raw.githubusercontent.com/ElemenX-king/LifeOS/main/docker-compose.yml
@@ -117,10 +119,10 @@ npm run start:local
 ### 第三步：启动
 
 1. 按键盘 **Win + R**，输入 `powershell`，回车
-2. 在蓝色窗口里输入以下命令（可以复制粘贴）：
+在蓝色窗口里输入以下命令（可以复制粘贴）：
 
 ```powershell
-cd $env:USERPROFILE\Desktop\LifeOS
+cd $env:USERPROFILE\Documents\LifeOS
 docker compose up -d
 ```
 
