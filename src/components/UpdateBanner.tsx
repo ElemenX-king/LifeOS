@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { RefreshCw, X } from 'lucide-react'
 
 const DISMISS_KEY = 'lifeos_update_dismissed'
+const CHECKED_KEY = 'lifeos_update_checked'
+const COOLDOWN_MS = 24 * 60 * 60 * 1000 // 24 hours
 
 interface ReleaseInfo {
   tag_name: string
@@ -25,20 +27,27 @@ export function UpdateBanner() {
   const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
-    // Check if already dismissed for this version
-    const stored = localStorage.getItem(DISMISS_KEY)
+    // 24h cooldown — skip fetch if checked recently
+    const lastChecked = localStorage.getItem(CHECKED_KEY)
+    if (lastChecked) {
+      const elapsed = Date.now() - parseInt(lastChecked, 10)
+      if (elapsed < COOLDOWN_MS) return
+    }
+
+    const storedDismiss = localStorage.getItem(DISMISS_KEY)
 
     fetch('https://api.github.com/repos/ElemenX-king/LifeOS/releases/latest')
       .then(r => r.json())
       .then((data: ReleaseInfo) => {
+        localStorage.setItem(CHECKED_KEY, String(Date.now()))
         if (!data.tag_name) return
         if (compareVersions(APP_VERSION, data.tag_name)) {
-          if (stored !== data.tag_name) {
+          if (storedDismiss !== data.tag_name) {
             setRelease(data)
           }
         }
       })
-      .catch(() => {}) // network error — just skip
+      .catch(() => {}) // network error — silently skip
   }, [])
 
   if (!release || dismissed) return null
