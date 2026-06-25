@@ -3,7 +3,7 @@ import { RefreshCw, X } from 'lucide-react'
 
 const DISMISS_KEY = 'lifeos_update_dismissed'
 const CHECKED_KEY = 'lifeos_update_checked'
-const COOLDOWN_MS = 24 * 60 * 60 * 1000 // 24 hours
+const COOLDOWN_MS = 24 * 60 * 60 * 1000
 
 interface ReleaseInfo {
   tag_name: string
@@ -11,7 +11,6 @@ interface ReleaseInfo {
 }
 
 function compareVersions(current: string, latest: string): boolean {
-  // Remove 'v' prefix if present, split into parts
   const parse = (v: string) => v.replace(/^v/, '').split('.').map(Number)
   const c = parse(current)
   const l = parse(latest)
@@ -27,11 +26,9 @@ export function UpdateBanner() {
   const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
-    // 24h cooldown — skip fetch if checked recently
     const lastChecked = localStorage.getItem(CHECKED_KEY)
     if (lastChecked) {
-      const elapsed = Date.now() - parseInt(lastChecked, 10)
-      if (elapsed < COOLDOWN_MS) return
+      if (Date.now() - parseInt(lastChecked, 10) < COOLDOWN_MS) return
     }
 
     const storedDismiss = localStorage.getItem(DISMISS_KEY)
@@ -47,7 +44,7 @@ export function UpdateBanner() {
           }
         }
       })
-      .catch(() => {}) // network error — silently skip
+      .catch(() => {})
   }, [])
 
   if (!release || dismissed) return null
@@ -69,7 +66,7 @@ export function UpdateBanner() {
         rel="noopener"
         className="underline underline-offset-2 hover:text-amber-700"
       >
-        查看
+        查看更新
       </a>
       <button
         onClick={dismiss}
