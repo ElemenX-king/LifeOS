@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { RefreshCw, X } from 'lucide-react'
+import { RefreshCw, X, Download } from 'lucide-react'
 
 const DISMISS_KEY = 'lifeos_update_dismissed'
 const CHECKED_KEY = 'lifeos_update_checked'
@@ -24,6 +24,8 @@ function compareVersions(current: string, latest: string): boolean {
 export function UpdateBanner() {
   const [release, setRelease] = useState<ReleaseInfo | null>(null)
   const [dismissed, setDismissed] = useState(false)
+  const [updating, setUpdating] = useState(false)
+  const [done, setDone] = useState(false)
 
   useEffect(() => {
     const lastChecked = localStorage.getItem(CHECKED_KEY)
@@ -47,11 +49,39 @@ export function UpdateBanner() {
       .catch(() => {})
   }, [])
 
+  const update = async () => {
+    setUpdating(true)
+    try {
+      await fetch('/api/update', { method: 'POST' })
+      setDone(true)
+    } catch {
+      // Server already restarted — just reload
+      setTimeout(() => location.reload(), 2000)
+    }
+  }
+
   if (!release || dismissed) return null
 
   const dismiss = () => {
     localStorage.setItem(DISMISS_KEY, release.tag_name)
     setDismissed(true)
+  }
+
+  if (updating) {
+    return (
+      <div className="flex items-center justify-center gap-3 bg-green-50 border-b border-green-200 px-4 py-2 text-sm text-green-900">
+        <RefreshCw size={14} className="shrink-0 animate-spin" />
+        <span>正在更新到 <strong>{release.tag_name}</strong>...</span>
+      </div>
+    )
+  }
+
+  if (done) {
+    return (
+      <div className="flex items-center justify-center gap-3 bg-green-50 border-b border-green-200 px-4 py-2 text-sm text-green-900">
+        <span>✅ 更新完成！页面即将刷新...</span>
+      </div>
+    )
   }
 
   return (
@@ -66,8 +96,15 @@ export function UpdateBanner() {
         rel="noopener"
         className="underline underline-offset-2 hover:text-amber-700"
       >
-        查看更新
+        查看
       </a>
+      <button
+        onClick={update}
+        className="flex items-center gap-1 px-2 py-1 bg-amber-200 hover:bg-amber-300 rounded text-amber-900 font-medium"
+      >
+        <Download size={14} />
+        一键更新
+      </button>
       <button
         onClick={dismiss}
         className="ml-auto p-1 hover:bg-amber-200 rounded"

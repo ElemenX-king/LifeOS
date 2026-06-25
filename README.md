@@ -58,17 +58,18 @@ npm install
 # 构建前端
 npm run build
 
-# 启动服务（默认 :3000）
-npm start
+# 启动服务（默认 :3000，退出自动重启）
+npm run start:local
 
 # 自定义端口
-PORT=8080 npm start
+PORT=8080 npm run start:local
 ```
 
 - 内置 Express 服务端 + **sql.js**（SQLite 编译为 WASM）
 - 数据保存在 `./data/` 目录，与 Docker 模式完全兼容
 - 要求：Node.js ≥ 18
 - 每次打开页面自动检查 GitHub 最新版本，有更新会提示 🆕
+- 点击「一键更新」按钮自动拉取代码、构建、重启服务
 
 ---
 

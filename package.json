@@ -10,7 +10,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "node --import tsx server/index.ts"
+    "start": "node --import tsx server/index.ts",
+    "start:local": "node server/start.js"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.1",

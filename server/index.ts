@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import path from 'path'
+import { execSync } from 'child_process'
 import { getDb, all, first, run } from './database'
 
 const app = express()
@@ -114,6 +115,19 @@ app.put('/api/journal', async (req, res) => {
 
 // SPA fallback
 app.get('/{*splat}', (_req, res) => res.sendFile(path.join(process.cwd(), 'dist', 'index.html')))
+
+// Self-update (local deployment only)
+app.post('/api/update', async (_req, res) => {
+  try {
+    execSync('git pull', { cwd: process.cwd(), timeout: 30000 })
+    execSync('npm install --omit=dev', { cwd: process.cwd(), timeout: 60000 })
+    execSync('npm run build', { cwd: process.cwd(), timeout: 60000 })
+    res.json({ ok: true })
+    setTimeout(() => process.exit(0), 1000)
+  } catch (e: any) {
+    res.status(500).json({ error: e.stderr?.toString() || e.message })
+  }
+})
 
 getDb().then(() => {
   app.listen(process.env.PORT || 3000, () => console.log('🚀 LifeOS on :' + (process.env.PORT || 3000)))
