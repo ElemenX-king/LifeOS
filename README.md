@@ -66,15 +66,17 @@ npm run preview
 
 ### 第三步：下载 LifeOS
 
-按 **Win + R**，输入 `powershell`，回车。在蓝色窗口里粘贴：
+在你喜欢的位置（比如 D 盘、文档、桌面，随你），打开 PowerShell：
+
+> 💡 **怎么在指定文件夹打开 PowerShell？**  
+> 文件资源管理器进入那个文件夹 → 地址栏输入 `powershell` → 回车
+
+然后粘贴：
 
 ```powershell
-cd $env:USERPROFILE\Documents
 git clone https://github.com/ElemenX-king/LifeOS.git
 cd LifeOS
 ```
-
-桌面上不会有任何东西，代码安静地放在「文档」里。
 
 ### 第四步：安装并启动
 
@@ -109,20 +111,21 @@ npm run start:local
 
 ### 第二步：下载部署文件
 
-1. 打开文件资源管理器，进入「文档」文件夹（`C:\Users\你的用户名\Documents`），新建一个文件夹叫 `LifeOS`
-2. 打开浏览器，访问这个链接下载配置文件：
-   
+1. 在你喜欢的位置新建一个文件夹，名字随便，比如 `LifeOS`
+2. 打开浏览器，下载这个文件保存进去：
+
    👉 https://raw.githubusercontent.com/ElemenX-king/LifeOS/main/docker-compose.yml
    
-   右键 → **另存为**，保存到刚才建的 `LifeOS` 文件夹里
+   右键 → **另存为**
 
 ### 第三步：启动
 
-1. 按键盘 **Win + R**，输入 `powershell`，回车
-在蓝色窗口里输入以下命令（可以复制粘贴）：
+> 💡 **怎么在那个文件夹打开 PowerShell？**  
+> 文件资源管理器进入文件夹 → 地址栏输入 `powershell` → 回车
+
+在蓝色窗口里粘贴：
 
 ```powershell
-cd $env:USERPROFILE\Documents\LifeOS
 docker compose up -d
 ```
 
@@ -136,7 +139,7 @@ docker compose up -d
 
 > 💡 **自动更新**：Watchtower 每小时检查 `:stable` 镜像，仅在发布新版本时自动更新，日常代码改动不会触发。
 >
-> 📁 **数据位置**：所有数据存在 `LifeOS` 文件夹下的 `data` 目录，备份这个文件夹即可。
+> 📁 **数据备份**：把 `LifeOS` 文件夹整个拷走即可，所有数据都在 `data` 子目录里。
 
 ---
 
