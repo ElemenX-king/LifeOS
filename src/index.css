@@ -109,6 +109,7 @@ input:focus, textarea:focus, select:focus {
 .banner-container {
   position: relative;
   margin-bottom: 0px;
+  overflow: hidden;
 }
 
 /* Banner 封面图片 */
@@ -117,7 +118,6 @@ input:focus, textarea:focus, select:focus {
   width: 100%;
   object-fit: cover;
   display: block;
-  object-position: 50% 77%;
 }
 
 /* [改动] 半透明遮罩底板 — inline-flex 收缩到内容宽度，右侧不再拉满 */
