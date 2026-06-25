@@ -1,7 +1,7 @@
 services:
   lifeos:
     # 生产：拉取 GitHub Actions 自动构建的镜像
-    image: ghcr.io/elemenx-king/lifeos:latest
+    image: ghcr.io/elemenx-king/lifeos:stable
     # 本地开发：注释掉 image，取消注释 build
     # build: .
     container_name: lifeos
